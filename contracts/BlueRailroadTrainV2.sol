@@ -6,6 +6,17 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+/**
+ * @title IBlueRailroadV1
+ * @notice Interface for reading data from the V1 Blue Railroad contract
+ */
+interface IBlueRailroadV1 is IERC721 {
+    function tokenIdToSongId(uint32 tokenId) external view returns (uint32);
+    function tokenIdToDate(uint32 tokenId) external view returns (uint32);
+    function tokenURI(uint256 tokenId) external view returns (string memory);
+}
 
 /**
  * @title BlueRailroadTrainV2
@@ -19,6 +30,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  *      V2 changes from V1:
  *      - Uses Ethereum blockheight instead of calendar date for temporal anchoring
  *      - Adds setBaseURI for future domain changes
+ *      - Adds trustless migration from V1 via migrateFromV1()
  */
 contract BlueRailroadTrainV2 is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, Ownable {
     uint32 private _nextTokenId;
@@ -29,15 +41,59 @@ contract BlueRailroadTrainV2 is ERC721, ERC721Enumerable, ERC721URIStorage, ERC7
     /// @notice Maps token ID to Ethereum mainnet blockheight when exercise was performed
     mapping(uint32 => uint256) public tokenIdToBlockheight;
 
+    /// @notice Tracks which V1 token IDs have been migrated (prevents double-migration)
+    mapping(uint256 => bool) public v1TokenMigrated;
+
     string private _baseTokenURI;
 
-    constructor(address initialOwner)
+    /// @notice The V1 contract address on Optimism
+    IBlueRailroadV1 public immutable v1Contract;
+
+    /// @notice Dead address where V1 tokens are sent during migration
+    address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+
+    /// @notice Emitted when a token is migrated from V1 to V2
+    event TokenMigrated(uint256 indexed v1TokenId, uint32 indexed v2TokenId, address indexed holder);
+
+    constructor(address initialOwner, address _v1Contract)
         ERC721("Blue Railroad Train Squats", "TONY")
         Ownable(initialOwner)
-    {}
+    {
+        v1Contract = IBlueRailroadV1(_v1Contract);
+    }
 
     /**
-     * @notice Mint a new Blue Railroad token
+     * @notice Migrate a token from V1 to V2 (trustless)
+     * @dev Caller must own the V1 token and have approved this contract to transfer it.
+     *      The V1 token is sent to the burn address, and a new V2 token is minted to caller.
+     *      Caller provides corrected metadata (songId, blockheight, uri) since V1 data may be wrong.
+     * @param v1TokenId The token ID on the V1 contract to migrate
+     * @param songId Corrected Manzanita track number (5=Pushups, 7=Squats, 8=Army Crawls)
+     * @param blockheight Ethereum mainnet blockheight when the exercise was performed
+     * @param uri Corrected IPFS URI for the token's video content
+     */
+    function migrateFromV1(uint256 v1TokenId, uint32 songId, uint256 blockheight, string memory uri) external {
+        require(!v1TokenMigrated[v1TokenId], "Token already migrated");
+        require(v1Contract.ownerOf(v1TokenId) == msg.sender, "Caller does not own V1 token");
+
+        // Mark as migrated before external call (reentrancy protection)
+        v1TokenMigrated[v1TokenId] = true;
+
+        // Transfer V1 token to burn address (caller must have approved this contract)
+        v1Contract.transferFrom(msg.sender, BURN_ADDRESS, v1TokenId);
+
+        // Mint V2 token to caller
+        uint32 v2TokenId = _nextTokenId++;
+        tokenIdToSongId[v2TokenId] = songId;
+        tokenIdToBlockheight[v2TokenId] = blockheight;
+        _safeMint(msg.sender, v2TokenId);
+        _setTokenURI(v2TokenId, uri);
+
+        emit TokenMigrated(v1TokenId, v2TokenId, msg.sender);
+    }
+
+    /**
+     * @notice Mint a new Blue Railroad token (owner only, for new exercises)
      * @param recipient Address to receive the token
      * @param songId Manzanita track number (5=Pushups, 7=Squats, 8=Army Crawls)
      * @param blockheight Ethereum mainnet blockheight when the exercise was performed
