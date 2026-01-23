@@ -91,10 +91,10 @@ contract BlueRailroadV2Tests is Test {
         assertEq(blueRailroad.tokenURI(0), "0");
 
         // Set base URI
-        blueRailroad.setBaseURI("https://cryptograss.live/bluerailroad/");
+        blueRailroad.setBaseURI("https://cryptograss.live/meta/bluerailroad/");
 
         // Now token URI includes base
-        assertEq(blueRailroad.tokenURI(0), "https://cryptograss.live/bluerailroad/0");
+        assertEq(blueRailroad.tokenURI(0), "https://cryptograss.live/meta/bluerailroad/0");
     }
 
     function test_non_owner_cannot_set_base_uri() public {
@@ -295,11 +295,11 @@ contract BlueRailroadV2Tests is Test {
     }
 
     function test_token_uri_format() public {
-        blueRailroad.setBaseURI("https://cryptograss.live/bluerailroad/");
+        blueRailroad.setBaseURI("https://cryptograss.live/meta/bluerailroad/");
         blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
         blueRailroad.issueTony(bob, PUSHUPS, BLOCK_JAN_2026);
 
-        assertEq(blueRailroad.tokenURI(0), "https://cryptograss.live/bluerailroad/0");
-        assertEq(blueRailroad.tokenURI(1), "https://cryptograss.live/bluerailroad/1");
+        assertEq(blueRailroad.tokenURI(0), "https://cryptograss.live/meta/bluerailroad/0");
+        assertEq(blueRailroad.tokenURI(1), "https://cryptograss.live/meta/bluerailroad/1");
     }
 }

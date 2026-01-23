@@ -158,7 +158,7 @@ contract BlueRailroadTrainV2 is ERC721, ERC721Enumerable, ERC721Burnable, Ownabl
 
     /**
      * @dev Returns the full URI for a token's metadata.
-     *      Concatenates baseURI + tokenId (e.g., "https://cryptograss.live/bluerailroad/" + "0")
+     *      Concatenates baseURI + tokenId (e.g., "https://cryptograss.live/meta/bluerailroad/" + "0")
      */
     function tokenURI(uint256 tokenId)
         public
