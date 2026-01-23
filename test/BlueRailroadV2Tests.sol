@@ -53,19 +53,18 @@ contract BlueRailroadV2Tests is Test {
     // ============ Minting Tests ============
 
     function test_mint_token_with_correct_metadata() public {
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026, "ipfs://QmTest123");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
 
         assertEq(blueRailroad.ownerOf(0), alice);
         assertEq(blueRailroad.tokenIdToSongId(0), SQUATS);
         assertEq(blueRailroad.tokenIdToBlockheight(0), BLOCK_JAN_2026);
-        assertEq(blueRailroad.tokenURI(0), "ipfs://QmTest123");
         assertEq(blueRailroad.totalSupply(), 1);
     }
 
     function test_mint_multiple_tokens_increments_id() public {
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2024, "ipfs://QmFirst");
-        blueRailroad.issueTony(bob, PUSHUPS, BLOCK_JAN_2024 + 1000, "ipfs://QmSecond");
-        blueRailroad.issueTony(alice, ARMY_CRAWLS, BLOCK_JAN_2026, "ipfs://QmThird");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2024);
+        blueRailroad.issueTony(bob, PUSHUPS, BLOCK_JAN_2024 + 1000);
+        blueRailroad.issueTony(alice, ARMY_CRAWLS, BLOCK_JAN_2026);
 
         assertEq(blueRailroad.totalSupply(), 3);
         assertEq(blueRailroad.ownerOf(0), alice);
@@ -80,22 +79,22 @@ contract BlueRailroadV2Tests is Test {
     function test_only_owner_can_mint() public {
         vm.prank(alice);
         vm.expectRevert();
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026, "ipfs://QmTest");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
     }
 
     // ============ Base URI Tests ============
 
     function test_owner_can_set_base_uri() public {
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026, "QmTest123");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
 
-        // Initially no base URI
-        assertEq(blueRailroad.tokenURI(0), "QmTest123");
+        // Initially no base URI, tokenURI is just the ID
+        assertEq(blueRailroad.tokenURI(0), "0");
 
         // Set base URI
-        blueRailroad.setBaseURI("ipfs://");
+        blueRailroad.setBaseURI("https://cryptograss.live/bluerailroad/");
 
         // Now token URI includes base
-        assertEq(blueRailroad.tokenURI(0), "ipfs://QmTest123");
+        assertEq(blueRailroad.tokenURI(0), "https://cryptograss.live/bluerailroad/0");
     }
 
     function test_non_owner_cannot_set_base_uri() public {
@@ -107,7 +106,7 @@ contract BlueRailroadV2Tests is Test {
     // ============ ERC721 Standard Tests ============
 
     function test_token_holder_can_transfer() public {
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026, "ipfs://QmTest");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
 
         vm.prank(alice);
         blueRailroad.transferFrom(alice, bob, 0);
@@ -116,7 +115,7 @@ contract BlueRailroadV2Tests is Test {
     }
 
     function test_token_holder_can_burn() public {
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026, "ipfs://QmTest");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
 
         assertEq(blueRailroad.totalSupply(), 1);
 
@@ -127,9 +126,9 @@ contract BlueRailroadV2Tests is Test {
     }
 
     function test_enumerable_functions_work() public {
-        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2024, "ipfs://Qm1");
-        blueRailroad.issueTony(alice, PUSHUPS, BLOCK_JAN_2024 + 500, "ipfs://Qm2");
-        blueRailroad.issueTony(bob, ARMY_CRAWLS, BLOCK_JAN_2026, "ipfs://Qm3");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2024);
+        blueRailroad.issueTony(alice, PUSHUPS, BLOCK_JAN_2024 + 500);
+        blueRailroad.issueTony(bob, ARMY_CRAWLS, BLOCK_JAN_2026);
 
         assertEq(blueRailroad.balanceOf(alice), 2);
         assertEq(blueRailroad.balanceOf(bob), 1);
@@ -175,7 +174,7 @@ contract BlueRailroadV2Tests is Test {
 
         // Alice migrates with corrected metadata
         vm.prank(alice);
-        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024, "ipfs://QmCorrected");
+        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024);
 
         // V1 token should be at burn address
         assertEq(v1Contract.ownerOf(0), blueRailroad.BURN_ADDRESS());
@@ -184,7 +183,6 @@ contract BlueRailroadV2Tests is Test {
         assertEq(blueRailroad.ownerOf(0), alice);
         assertEq(blueRailroad.tokenIdToSongId(0), SQUATS);
         assertEq(blueRailroad.tokenIdToBlockheight(0), BLOCK_JAN_2024);
-        assertEq(blueRailroad.tokenURI(0), "ipfs://QmCorrected");
 
         // Migration should be marked
         assertTrue(blueRailroad.v1TokenMigrated(0));
@@ -197,7 +195,7 @@ contract BlueRailroadV2Tests is Test {
         // Bob tries to migrate alice's token
         vm.prank(bob);
         vm.expectRevert("Caller does not own V1 token");
-        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024, "ipfs://QmStolen");
+        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024);
     }
 
     function test_migrate_from_v1_double_migration_reverts() public {
@@ -207,7 +205,7 @@ contract BlueRailroadV2Tests is Test {
         // Alice approves and migrates
         vm.startPrank(alice);
         v1Contract.approve(address(blueRailroad), 0);
-        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024, "ipfs://QmFirst");
+        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024);
         vm.stopPrank();
 
         // Now mint another V1 token with same ID to bob (simulating burn address transfer back - impossible in reality)
@@ -217,7 +215,7 @@ contract BlueRailroadV2Tests is Test {
         // Try to migrate again (would fail anyway since token is at burn address, but mapping catches it first)
         vm.prank(alice);
         vm.expectRevert("Token already migrated");
-        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024, "ipfs://QmSecond");
+        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024);
     }
 
     function test_migrate_multiple_tokens() public {
@@ -230,14 +228,14 @@ contract BlueRailroadV2Tests is Test {
         vm.startPrank(alice);
         v1Contract.approve(address(blueRailroad), 0);
         v1Contract.approve(address(blueRailroad), 1);
-        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024, "ipfs://Qm0");
-        blueRailroad.migrateFromV1(1, SQUATS, BLOCK_JAN_2024 + 1000, "ipfs://Qm1");
+        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024);
+        blueRailroad.migrateFromV1(1, SQUATS, BLOCK_JAN_2024 + 1000);
         vm.stopPrank();
 
         // Bob migrates his token
         vm.startPrank(bob);
         v1Contract.approve(address(blueRailroad), 2);
-        blueRailroad.migrateFromV1(2, ARMY_CRAWLS, BLOCK_JAN_2026, "ipfs://Qm2");
+        blueRailroad.migrateFromV1(2, ARMY_CRAWLS, BLOCK_JAN_2026);
         vm.stopPrank();
 
         // Check V2 state
@@ -261,15 +259,15 @@ contract BlueRailroadV2Tests is Test {
         vm.prank(alice);
         v1Contract.approve(address(blueRailroad), 0);
         vm.prank(alice);
-        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024, "ipfs://Qm0");
+        blueRailroad.migrateFromV1(0, SQUATS, BLOCK_JAN_2024);
 
         vm.prank(bob);
         v1Contract.approve(address(blueRailroad), 2);
         vm.prank(bob);
-        blueRailroad.migrateFromV1(2, SQUATS, BLOCK_JAN_2024, "ipfs://Qm2");
+        blueRailroad.migrateFromV1(2, SQUATS, BLOCK_JAN_2024);
 
         // Now mint a new token - should get ID 3 (after highest migrated ID)
-        blueRailroad.issueTony(alice, ARMY_CRAWLS, BLOCK_JAN_2026, "ipfs://QmNew");
+        blueRailroad.issueTony(alice, ARMY_CRAWLS, BLOCK_JAN_2026);
 
         // Verify token IDs: 0 (migrated), 2 (migrated), 3 (new)
         assertEq(blueRailroad.ownerOf(0), alice);
@@ -285,14 +283,23 @@ contract BlueRailroadV2Tests is Test {
         vm.prank(alice);
         v1Contract.approve(address(blueRailroad), 4);
         vm.prank(alice);
-        blueRailroad.migrateFromV1(4, SQUATS, BLOCK_JAN_2024, "ipfs://Qm4");
+        blueRailroad.migrateFromV1(4, SQUATS, BLOCK_JAN_2024);
 
         // V2 token should have same ID as V1 token
         assertEq(blueRailroad.ownerOf(4), alice);
         assertTrue(blueRailroad.v1TokenMigrated(4));
 
         // Next new mint should be ID 5
-        blueRailroad.issueTony(bob, PUSHUPS, BLOCK_JAN_2026, "ipfs://QmNext");
+        blueRailroad.issueTony(bob, PUSHUPS, BLOCK_JAN_2026);
         assertEq(blueRailroad.ownerOf(5), bob);
+    }
+
+    function test_token_uri_format() public {
+        blueRailroad.setBaseURI("https://cryptograss.live/bluerailroad/");
+        blueRailroad.issueTony(alice, SQUATS, BLOCK_JAN_2026);
+        blueRailroad.issueTony(bob, PUSHUPS, BLOCK_JAN_2026);
+
+        assertEq(blueRailroad.tokenURI(0), "https://cryptograss.live/bluerailroad/0");
+        assertEq(blueRailroad.tokenURI(1), "https://cryptograss.live/bluerailroad/1");
     }
 }
