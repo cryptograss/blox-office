@@ -64,6 +64,7 @@ contract BlueRailroadTrainV2 is ERC721, ERC721Enumerable, ERC721Burnable, Ownabl
         Ownable(initialOwner)
     {
         v1Contract = IBlueRailroadV1(_v1Contract);
+        _nextTokenId = 5; // Reserve 0-4 for V1 migrations
     }
 
     /**
