@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+            {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Deployment",
+            "skipFiles": ["<node_internals>/**"],
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/hardhat",
+            "args": ["run", "scripts/deploy-blue-railroads.ts", "--network", "polygon-amoy"],
+            "cwd": "${workspaceFolder}"
+        },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Ignition Deploy",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/hardhat/internal/cli/cli.js",
+      "args": ["ignition", "deploy", "./ignition/modules/BlueRailroad.ts", "--network", "polygon-amoy"],
+      "env": {
+        "PRIVATE_KEY": "defdefdefdefdefdefdefdefdefdefdefdefdefdefdefdefdefdefdefdefdefd"
+      },
+      "outFiles": ["${workspaceFolder}/**/*.js"],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug BlueRailroad Tests",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "hardhat",
+        "test",
+        "__tests__/BlueRailroad.test.ts",
+        "--network",
+        "hardhat"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Generate Deployment Manifest",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ts-node"],
+      "args": ["${workspaceFolder}/build_logic/generate_manifest.ts"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+} 

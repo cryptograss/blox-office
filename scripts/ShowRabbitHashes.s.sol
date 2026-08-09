@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
-import "../lib/forge-std/src/Script.sol";
-import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+import "lib/forge-std/src/Script.sol";
+import "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 event RabbitHash(bytes32 indexed hash);
 

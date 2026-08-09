@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../lib/forge-std/src/Script.sol";
-import "../contracts/LiveSet.sol";
-import "../contracts/SetStone.sol";
-import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+import "lib/forge-std/src/Script.sol";
+import "contracts/LiveSet.sol";
+import "contracts/SetStone.sol";
+import "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 
 contract DeploySetStonesScript is Script {

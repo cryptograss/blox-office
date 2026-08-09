@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/LiveSet.sol";
+import "contracts/LiveSet.sol";
 
 contract SetTest is Test {
     LiveSet set_contract;

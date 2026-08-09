@@ -1,0 +1,44 @@
+{% extends "base.njk" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl mb-8">Deployed Contracts</h1>
+    
+    {% for chainId, contracts in manifest.contracts %}
+        <div class="mb-8">
+            <h2 class="text-2xl mb-4">
+                Chain {{ chainId }}
+                {% if chainId == "137" %}(Polygon){% endif %}
+            </h2>
+            
+            {% for name, contract in contracts %}
+                <div class="border p-4 rounded-lg mb-4">
+                    <h3 class="text-xl mb-2">{{ name }}</h3>
+                    <div class="grid gap-2">
+                        <div>
+                            <span class="font-semibold">Address:</span>
+                            <code class="ml-2 bg-gray-100 px-2 py-1 rounded">{{ contract.address }}</code>
+                        </div>
+                        <div>
+                            <span class="font-semibold">Deployment Block:</span>
+                            <span class="ml-2">{{ contract.deploymentBlock }}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold">Transaction:</span>
+                            <a href="https://polygonscan.com/tx/{{ contract.deploymentTx }}" 
+                               class="ml-2 text-blue-500 hover:text-blue-700">
+                                View on Explorer →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    
+    <div class="mt-8 text-sm text-gray-600">
+        <p>Last updated: Block {{ manifest.timestamp }}</p>
+        <p>Git commit: <code>{{ manifest.gitCommit }}</code></p>
+    </div>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/MagicHat.sol";
+import "contracts/MagicHat.sol";
 
 contract MagicHatTest is Test {
     MagicHat magicHat;
